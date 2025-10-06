@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>UV</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+    
+</head>
+
+<body>
+    <!-- core three.js -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/EXRLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.9/build/dat.gui.min.js"></script>
+
+
+
+    <script>
+
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true; // ✅ เปิดใช้งานเงา!
+        //ลดความเข้มสี(2บรรทัด)
+        renderer.toneMapping = THREE.ACESFilmicToneMapping; // tone mapping ที่ดูสมจริง
+        renderer.toneMappingExposure = 0.8; // ลดความสว่าง
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+
+        const pmremGenerator = new THREE.PMREMGenerator(renderer);
+        pmremGenerator.compileEquirectangularShader();
+
+        const exrLoader = new THREE.EXRLoader();
+        exrLoader.load('https://trakanta4556.github.io/comgraph_project/kiara_1_dawn_2k.exr', function (texture) {
+        const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+
+        scene.environment = envMap;
+        scene.background = envMap;
+
+        texture.dispose();
+        pmremGenerator.dispose();
+        });
+
+
+        const scene = new THREE.Scene();
+
+        // ✅ กล้อง
+        const camera = new THREE.PerspectiveCamera(
+            35,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            1000
+        );
+        camera.position.set(-3.5, 2.5, 10);
+        camera.lookAt(0, 0, 0);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);      
+        const ambientLight = new THREE.AmbientLight(0xFFF9A1, 0.1); // แสงสว่างทั่วไป
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffeedd, 0.2); // แสงทิศทาง
+        directionalLight.position.set(10, 5, 10);
+        directionalLight.castShadow = true; // ✅ แสงนี้สร้างเงา
+        scene.add(directionalLight);
+
+        //ไฟ
+        const pointLight = new THREE.PointLight(0xE9967A, 0.15, 2); //สี, ความเข้ม
+        pointLight.position.set(2, 2, 1);
+        pointLight.castShadow = true;
+        scene.add(pointLight);
+        
+        //โหลดModel
+        const gltfLoader = new THREE.GLTFLoader();
+        gltfLoader.load('https://trakanta4556.github.io/comgraph_project/chinese_temple_final.glb', function(gltf) {
+        const model = gltf.scene;
+        model.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }   
+        });
+        scene.add(model);
+    });    
+
+        //load Model temple
+        const gltfLoader_temple = new THREE.GLTFLoader();
+        gltfLoader_temple.load('https://trakanta4556.github.io/comgraph_project/boat_final.glb', function(gltf) {
+        const model_temple = gltf.scene;
+        model_temple.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }   
+        });
+        scene.add(model_temple);
+    });
+
+        //load Model house
+        const gltfLoader_house = new THREE.GLTFLoader();
+        gltfLoader_house.load('https://trakanta4556.github.io/comgraph_project/chinese_house_final.glb', function(gltf) {
+        const model_house = gltf.scene;
+        model_house.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }   
+        });
+        scene.add(model_house);
+    });
+
+        //load Model hedge
+        const gltfLoader_hedge = new THREE.GLTFLoader();
+        gltfLoader_hedge.load('https://trakanta4556.github.io/comgraph_project/hedge_final.glb', function(gltf) {
+        const model_hedge = gltf.scene;
+        model_hedge.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }   
+        });
+        scene.add(model_hedge);
+    });
+
+        //load Model tree_near_house
+        const gltfLoader_tree_near_house = new THREE.GLTFLoader();
+        gltfLoader_tree_near_house.load('https://trakanta4556.github.io/comgraph_project/tree_near_house.glb', function(gltf) {
+        const model_tree_near_house = gltf.scene;
+        model_tree_near_house.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }   
+        });
+        scene.add(model_tree_near_house);
+    });
+
+        //load Model tree_near_temple
+        const gltfLoader_tree_near_temple = new THREE.GLTFLoader();
+        gltfLoader_tree_near_temple.load('https://trakanta4556.github.io/comgraph_project/tree_near_temple.glb', function(gltf) {
+        const model_tree_near_temple = gltf.scene;
+        model_tree_near_temple.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }   
+        });
+        scene.add(model_tree_near_temple);
+    });
+
+        //load Model text
+        const gltfLoader_text = new THREE.GLTFLoader();
+        gltfLoader_text.load('https://trakanta4556.github.io/comgraph_project/text.glb', function(gltf) {
+        const model_text = gltf.scene;
+        model_text.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }   
+        });
+        scene.add(model_text);
+    });
+
+    //load Model pic
+        const gltfLoader_pic = new THREE.GLTFLoader();
+        gltfLoader_pic.load('https://trakanta4556.github.io/comgraph_project/pic.glb', function(gltf) {
+        const model_pic = gltf.scene;
+        model_pic.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }   
+        });
+        scene.add(model_pic);
+    });
+
+        //floor
+        const texFloor = new THREE.TextureLoader().load('https://trakanta4556.github.io/comgraph_project/brick_pavement_02_diff_1k.jpg', t => {
+            t.wrapS = THREE.RepeatWrapping;
+            t.wrapT = THREE.RepeatWrapping;
+            t.repeat.set(4,4); //ให้ลายซ้ำๆกัน xครั้งแนวนอน yครั้งแนวตั้ง ทำให้ลายเป็นเล็กๆ
+        });
+            
+        const matFloor = new THREE.MeshStandardMaterial({
+            map: texFloor,
+            roughness: 0.8 //ค่ามากสะท้อนแสงน้อยลง 0-1 0จะเงา 1จะด้าน
+        });
+        const planeGeometry = new THREE.PlaneGeometry(10,10);
+        const plane = new THREE.Mesh(planeGeometry, matFloor);
+        plane.rotation.x = -Math.PI /2;    
+        plane.receiveShadow = true;
+        scene.add(plane);
+
+        //✅ render loop
+        function animate(t) {
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+        animate(0);
+
+        window.addEventListener('keydown', (event) => {
+
+        });
+
+    </script>
+</body>
+
+</html>
