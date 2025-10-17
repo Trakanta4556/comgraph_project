@@ -76,16 +76,16 @@
         scene.add(pointLight);
         
         //load model gate
-        const gltfLoader = new THREE.GLTFLoader();
-        gltfLoader.load('https://trakanta4556.github.io/comgraph_project/gate.glb', function(gltf) {
-        const model = gltf.scene;
-        model.traverse(function(child) {
+        const gate = new THREE.GLTFLoader();
+        gate.load('https://trakanta4556.github.io/comgraph_project/gate.glb', function(gltf) {
+        const gate = gltf.scene;
+        gate.traverse(function(child) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
             }   
         });
-        scene.add(model);
+        scene.add(gate);
     });    
         //load model bridge1
         const bridge1 = new THREE.GLTFLoader();
@@ -413,10 +413,31 @@
         requestAnimationFrame(loop);
     })();
 
-    
+    let mixer;
+    const clock = new THREE.Clock();
+
+    // — โหลดโมเดล GLB ที่มี animation
+    const loader = new THREE.GLTFLoader();
+    loader.load('https://trakanta4556.github.io/comgraph_project/animationglb.glb',(gltf) => {
+        console.log("✅ GLB loaded", gltf);
+        const model = gltf.scene;
+        scene.add(model);
+
+        if (gltf.animations && gltf.animations.length > 0) {
+            mixer = new THREE.AnimationMixer(model);
+            gltf.animations.forEach((clip) => {
+            console.log("Animation clip:", clip.name, "duration:", clip.duration);
+            const action = mixer.clipAction(clip);
+            action.play();
+            });
+        } 
+        }
+    );
 
         //✅ render loop
         function animate(t) {
+            const delta = clock.getDelta();
+            if (mixer) mixer.update(delta);
             renderer.render(scene, camera);
             requestAnimationFrame(animate);
         }
@@ -430,3 +451,4 @@
 </body>
 
 </html>
+
