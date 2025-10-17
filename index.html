@@ -321,6 +321,32 @@
         scene.add(text_credit_tree);
     });
 
+    //load model sign_about_me
+        const sign_about_me = new THREE.GLTFLoader();
+        sign_about_me.load('https://trakanta4556.github.io/comgraph_project/sign_about_me.glb', function(gltf) {
+        const sign_about_me = gltf.scene;
+        sign_about_me.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }   
+        });
+        scene.add(sign_about_me);
+    });
+
+    //load model sign_credits
+        const sign_credits = new THREE.GLTFLoader();
+        sign_credits.load('https://trakanta4556.github.io/comgraph_project/sign_credits.glb', function(gltf) {
+        const sign_credits = gltf.scene;
+        sign_credits.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }   
+        });
+        scene.add(sign_credits);
+    });
+
     //load water plane 
     const uniforms = { 
     uTime: { value: 0.0 } ,
@@ -413,10 +439,10 @@
         requestAnimationFrame(loop);
     })();
 
+    // — โหลดโมเดล GLB ที่มี animation
     let mixer;
     const clock = new THREE.Clock();
 
-    // — โหลดโมเดล GLB ที่มี animation
     const loader = new THREE.GLTFLoader();
     loader.load('https://trakanta4556.github.io/comgraph_project/animationglb.glb',(gltf) => {
         console.log("✅ GLB loaded", gltf);
