@@ -58,7 +58,7 @@
             0.1,
             1000
         );
-        camera.position.set(-3.5, 2.5, 10);
+        camera.position.set(1, 6.5, 50);
         camera.lookAt(0, 0, 0);
         const controls = new THREE.OrbitControls(camera, renderer.domElement);      
         const ambientLight = new THREE.AmbientLight(0xFFF9A1, 0.1); // แสงสว่างทั่วไป
@@ -75,9 +75,9 @@
         pointLight.castShadow = true;
         scene.add(pointLight);
         
-        //โหลดModel
+        //load model gate
         const gltfLoader = new THREE.GLTFLoader();
-        gltfLoader.load('https://trakanta4556.github.io/comgraph_project/chinese_temple_final.glb', function(gltf) {
+        gltfLoader.load('https://trakanta4556.github.io/comgraph_project/gate.glb', function(gltf) {
         const model = gltf.scene;
         model.traverse(function(child) {
             if (child.isMesh) {
@@ -87,114 +87,333 @@
         });
         scene.add(model);
     });    
-
-        //load Model temple
-        const gltfLoader_temple = new THREE.GLTFLoader();
-        gltfLoader_temple.load('https://trakanta4556.github.io/comgraph_project/boat_final.glb', function(gltf) {
-        const model_temple = gltf.scene;
-        model_temple.traverse(function(child) {
+        //load model bridge1
+        const bridge1 = new THREE.GLTFLoader();
+        bridge1.load('https://trakanta4556.github.io/comgraph_project/bridge1.glb', function(gltf) {
+        const bridge1 = gltf.scene;
+        bridge1.traverse(function(child) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
             }   
         });
-        scene.add(model_temple);
+        scene.add(bridge1);
     });
 
-        //load Model house
-        const gltfLoader_house = new THREE.GLTFLoader();
-        gltfLoader_house.load('https://trakanta4556.github.io/comgraph_project/chinese_house_final.glb', function(gltf) {
-        const model_house = gltf.scene;
-        model_house.traverse(function(child) {
+    //load model boat
+        const boat = new THREE.GLTFLoader();
+        boat.load('https://trakanta4556.github.io/comgraph_project/boat.glb', function(gltf) {
+        const boat = gltf.scene;
+        boat.traverse(function(child) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
             }   
         });
-        scene.add(model_house);
+        scene.add(boat);
     });
 
-        //load Model hedge
-        const gltfLoader_hedge = new THREE.GLTFLoader();
-        gltfLoader_hedge.load('https://trakanta4556.github.io/comgraph_project/hedge_final.glb', function(gltf) {
-        const model_hedge = gltf.scene;
-        model_hedge.traverse(function(child) {
+    //load model text_name
+        const text_name = new THREE.GLTFLoader();
+        text_name.load('https://trakanta4556.github.io/comgraph_project/text_name.glb', function(gltf) {
+        const text_name = gltf.scene;
+        text_name.traverse(function(child) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
             }   
         });
-        scene.add(model_hedge);
+        scene.add(text_name);
     });
 
-        //load Model tree_near_house
-        const gltfLoader_tree_near_house = new THREE.GLTFLoader();
-        gltfLoader_tree_near_house.load('https://trakanta4556.github.io/comgraph_project/tree_near_house.glb', function(gltf) {
-        const model_tree_near_house = gltf.scene;
-        model_tree_near_house.traverse(function(child) {
+    //load model pic
+        const pic = new THREE.GLTFLoader();
+        pic.load('https://trakanta4556.github.io/comgraph_project/pic.glb', function(gltf) {
+        const pic = gltf.scene;
+        pic.traverse(function(child) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
             }   
         });
-        scene.add(model_tree_near_house);
+        scene.add(pic);
     });
 
-        //load Model tree_near_temple
-        const gltfLoader_tree_near_temple = new THREE.GLTFLoader();
-        gltfLoader_tree_near_temple.load('https://trakanta4556.github.io/comgraph_project/tree_near_temple.glb', function(gltf) {
-        const model_tree_near_temple = gltf.scene;
-        model_tree_near_temple.traverse(function(child) {
+    //load model tree_boat
+        const tree_boat = new THREE.GLTFLoader();
+        tree_boat.load('https://trakanta4556.github.io/comgraph_project/tree_boat.glb', function(gltf) {
+        const tree_boat = gltf.scene;
+        tree_boat.traverse(function(child) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
             }   
         });
-        scene.add(model_tree_near_temple);
+        scene.add(tree_boat);
     });
 
-        //load Model text
-        const gltfLoader_text = new THREE.GLTFLoader();
-        gltfLoader_text.load('https://trakanta4556.github.io/comgraph_project/text.glb', function(gltf) {
-        const model_text = gltf.scene;
-        model_text.traverse(function(child) {
+    //load model temple
+        const temple = new THREE.GLTFLoader();
+        temple.load('https://trakanta4556.github.io/comgraph_project/temple.glb', function(gltf) {
+        const temple = gltf.scene;
+        temple.traverse(function(child) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
             }   
         });
-        scene.add(model_text);
+        scene.add(temple);
     });
 
-    //load Model pic
-        const gltfLoader_pic = new THREE.GLTFLoader();
-        gltfLoader_pic.load('https://trakanta4556.github.io/comgraph_project/pic.glb', function(gltf) {
-        const model_pic = gltf.scene;
-        model_pic.traverse(function(child) {
+    //load model tree_temple
+        const tree_temple = new THREE.GLTFLoader();
+        tree_temple.load('https://trakanta4556.github.io/comgraph_project/tree_temple.glb', function(gltf) {
+        const tree_temple = gltf.scene;
+        tree_temple.traverse(function(child) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
             }   
         });
-        scene.add(model_pic);
+        scene.add(tree_temple);
     });
 
-        //floor
-        const texFloor = new THREE.TextureLoader().load('https://trakanta4556.github.io/comgraph_project/brick_pavement_02_diff_1k.jpg', t => {
-            t.wrapS = THREE.RepeatWrapping;
-            t.wrapT = THREE.RepeatWrapping;
-            t.repeat.set(4,4); //ให้ลายซ้ำๆกัน xครั้งแนวนอน yครั้งแนวตั้ง ทำให้ลายเป็นเล็กๆ
+    //load model well
+        const well = new THREE.GLTFLoader();
+        well.load('https://trakanta4556.github.io/comgraph_project/well.glb', function(gltf) {
+        const well = gltf.scene;
+        well.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }   
         });
-            
-        const matFloor = new THREE.MeshStandardMaterial({
-            map: texFloor,
-            roughness: 0.8 //ค่ามากสะท้อนแสงน้อยลง 0-1 0จะเงา 1จะด้าน
+        scene.add(well);
+    });
+
+    //load model bridge2
+        const bridge2 = new THREE.GLTFLoader();
+        bridge2.load('https://trakanta4556.github.io/comgraph_project/bridge2.glb', function(gltf) {
+        const bridge2 = gltf.scene;
+        bridge2.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }   
         });
-        const planeGeometry = new THREE.PlaneGeometry(10,10);
-        const plane = new THREE.Mesh(planeGeometry, matFloor);
-        plane.rotation.x = -Math.PI /2;    
-        plane.receiveShadow = true;
+        scene.add(bridge2);
+    });
+
+    //load model tree_well2
+        const tree_well2 = new THREE.GLTFLoader();
+        tree_well2.load('https://trakanta4556.github.io/comgraph_project/tree_well2.glb', function(gltf) {
+        const tree_well2 = gltf.scene;
+        tree_well2.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }   
+        });
+        scene.add(tree_well2);
+    });
+
+    //load model tree_well1
+        const tree_well1 = new THREE.GLTFLoader();
+        tree_well1.load('https://trakanta4556.github.io/comgraph_project/tree_well1.glb', function(gltf) {
+        const tree_well1 = gltf.scene;
+        tree_well1.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }   
+        });
+        scene.add(tree_well1);
+    });
+
+    //load model house
+        const house = new THREE.GLTFLoader();
+        house.load('https://trakanta4556.github.io/comgraph_project/house.glb', function(gltf) {
+        const house = gltf.scene;
+        house.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }   
+        });
+        scene.add(house);
+    });
+
+    //load model tree_house_left
+        const tree_house_left = new THREE.GLTFLoader();
+        tree_house_left.load('https://trakanta4556.github.io/comgraph_project/tree_house_left.glb', function(gltf) {
+        const tree_house_left = gltf.scene;
+        tree_house_left.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }   
+        });
+        scene.add(tree_house_left);
+    });
+
+    //load model tree_house_right
+        const tree_house_right = new THREE.GLTFLoader();
+        tree_house_right.load('https://trakanta4556.github.io/comgraph_project/tree_house_right.glb', function(gltf) {
+        const tree_house_right = gltf.scene;
+        tree_house_right.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }   
+        });
+        scene.add(tree_house_right);
+    });
+
+    //load model plane
+        const plane = new THREE.GLTFLoader();
+        plane.load('https://trakanta4556.github.io/comgraph_project/plane.glb', function(gltf) {
+        const plane = gltf.scene;
+        plane.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }   
+        });
         scene.add(plane);
+    });
+
+    //load model text_credit_building
+        const text_credit_building = new THREE.GLTFLoader();
+        text_credit_building.load('https://trakanta4556.github.io/comgraph_project/text_credit_building.glb', function(gltf) {
+        const text_credit_building = gltf.scene;
+        text_credit_building.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }   
+        });
+        scene.add(text_credit_building);
+    });
+
+    //load model text_credit_decoration
+        const text_credit_decoration = new THREE.GLTFLoader();
+        text_credit_decoration.load('https://trakanta4556.github.io/comgraph_project/text_credit_decoration.glb', function(gltf) {
+        const text_credit_decoration = gltf.scene;
+        text_credit_decoration.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }   
+        });
+        scene.add(text_credit_decoration);
+    });
+
+    //load model text_credit_tree
+        const text_credit_tree = new THREE.GLTFLoader();
+        text_credit_tree.load('https://trakanta4556.github.io/comgraph_project/text_credit_tree.glb', function(gltf) {
+        const text_credit_tree = gltf.scene;
+        text_credit_tree.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }   
+        });
+        scene.add(text_credit_tree);
+    });
+
+    //load water plane 
+    const uniforms = { 
+    uTime: { value: 0.0 } ,
+    uHeight: { value: null }, // texture ที่จะโหลดมา
+    uDeep: { value: new THREE.Color(0x385D8D) }, // deep blue (for valleys)
+    uHigh: { value: new THREE.Color(0xB2E4FF) }, // light blue (for peaks)
+    uContrast: { value: 1.0 }
+  };
+    // pan offset and animation controls
+    uniforms.uOffset = { value: new THREE.Vector2(0.0, 0.0) };
+    uniforms.uAmplitude = { value: 0.12 }; // vertical wave amplitude
+    uniforms.uSpeed = { value: 1.5 }; // speed multiplier for time
+    uniforms.uFreq = { value: 12.0 }; // how strongly height modulates phase
+    // ---- Shaders (sample texture ใน vertex แล้วดัน pos.z) ----
+    const vert = `
+        uniform sampler2D uHeight;
+        uniform float uTime; //sinc animation
+
+        // pan offset for sampling heightmap
+        uniform vec2 uOffset;
+
+    // animation controls
+    uniform float uAmplitude;
+    uniform float uSpeed;
+    uniform float uFreq;
+
+        varying float vH;
+
+        void main(){
+        vec3 pos = position;
+        // float h = texture2D(uHeight, uv).r* sin(uTime)+0.5; 
+    float h = texture2D(uHeight, uv + uOffset).r;
+    // base displacement from heightmap
+    pos.z = pos.z + (h * 0.8);
+    // add time-based vertical animation modulated by height
+    float wave = sin(uTime * uSpeed + h * uFreq) * uAmplitude;
+    pos.z += wave;
+        vH = h;                             
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+        }
+    `;
+    const frag = `
+        precision mediump float;
+        uniform vec3 uDeep;
+        uniform vec3 uHigh;
+        uniform float uContrast;
+        uniform vec2 uOffset;
+        varying float vH;
+        void main(){
+        // map vH [0,1] to [0,1] with simple contrast control
+        float t = clamp(vH, 0.0, 1.0);
+        // simple contrast: remap around 0.5
+        t = (t - 0.5) * uContrast + 0.5;
+        t = clamp(t, 0.0, 1.0);
+        vec3 color = mix(uDeep, uHigh, t);
+        gl_FragColor = vec4(color, 1.0);
+        }
+    `;
+
+    // โหลด texture แล้วค่อยสร้าง geometry/material ให้สัดส่วนตรงกับรูป
+    new THREE.TextureLoader().load('https://upload.wikimedia.org/wikipedia/commons/5/57/Heightmap.png', (tex) => {
+
+        uniforms.uHeight.value = tex;
+        const geo = new THREE.PlaneBufferGeometry(70, 70, 200, 200);
+        const mat = new THREE.ShaderMaterial({
+        vertexShader: vert,
+        fragmentShader: frag,
+        uniforms: uniforms,
+        //wireframe: true, // เปิดถ้าอยากดูเส้นตาราง
+        side: THREE.DoubleSide
+        
+        });
+
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.rotation.x = -Math.PI / 2; // หมุน plane แนวราบ
+        mesh.position.y = -1; // ลดระดับลงนิดหน่อย
+        scene.add(mesh);
+    });
+
+    // Resize & Render loop
+    addEventListener('resize', ()=>{
+        camera.aspect = innerWidth/innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(innerWidth, innerHeight);
+    });
+
+    (function loop(){
+        uniforms.uTime.value += 0.04;
+        renderer.render(scene, camera);
+        requestAnimationFrame(loop);
+    })();
+
+    
 
         //✅ render loop
         function animate(t) {
