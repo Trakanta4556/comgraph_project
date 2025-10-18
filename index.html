@@ -458,6 +458,25 @@
         textCreditTreeTarget = text_credit_tree; // <-- เก็บ reference ที่นี่
     });
 
+    //load model text_back_credit_tree
+    const text_back_credit_tree = new THREE.GLTFLoader();
+    text_back_credit_tree.load('https://trakanta4556.github.io/comgraph_project/text_back_credit_tree.glb', function(gltf) {
+        const text_back_credit_tree = gltf.scene;
+        text_back_credit_tree.name = 'text_back_credit_tree';
+        text_back_credit_tree.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                // ทำให้เลือกได้ และเมื่อกดให้ไปที่ text_credit_building
+                child.userData.pickable = true;
+                child.userData.action = 'goto_text_credit_building';
+                interactables.push(child);
+            }  
+        });
+        scene.add(text_back_credit_tree);
+        textBackCreditTreeTarget = text_back_credit_tree; // <-- เก็บ reference ที่นี่
+    });
+
     //load model sign_about_me
         const sign_about_me = new THREE.GLTFLoader();
         sign_about_me.load('https://trakanta4556.github.io/comgraph_project/sign_about_me.glb', function(gltf) {
@@ -755,9 +774,9 @@
                 const radius = Math.max(size.length() * 0.5, 0.5);
 
                 // ปรับมุม/ระยะ: เพิ่ม azimuth ให้ไปทางขวา และเพิ่ม elevation ให้กล้องสูงขึ้น
-                const distance = Math.max(6, radius * 3); // ปรับถ้าต้องการถอย/เข้า
-                const elevationDeg = 34; // เพิ่มค่านี้เพื่อให้กล้องสูงขึ้น
-                const azimuthDeg = 135;   // ค่า + เป็นเลื่อนมาทางขวา (ปรับเป็นลบถ้าต้องการซ้าย)
+                const distance = Math.max(6, radius * 2.8); // ปรับถ้าต้องการถอย/เข้า
+                const elevationDeg = 38; // เพิ่มค่านี้เพื่อให้กล้องสูงขึ้น
+                const azimuthDeg = 135.5;   // ค่า + เป็นเลื่อนมาทางขวา (ปรับเป็นลบถ้าต้องการซ้าย)
 
                 const phi = THREE.Math.degToRad(azimuthDeg);
                 const theta = THREE.Math.degToRad(elevationDeg);
