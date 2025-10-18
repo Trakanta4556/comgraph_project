@@ -51,6 +51,30 @@
 
         const scene = new THREE.Scene();
 
+        // --- Raycaster & interaction state ---
+        const raycaster = new THREE.Raycaster();
+        const pointer = new THREE.Vector2();
+        const interactables = []; // เก็บ mesh ที่สามารถคลิกได้ (เช่น sign_about_me)
+        let needsPick = false;
+        let highlighted = null;
+
+        // camera move/tween state
+        const cameraMove = {
+            active: false,
+            fromPos: new THREE.Vector3(),
+            toPos: new THREE.Vector3(),
+            fromTarget: new THREE.Vector3(),
+            toTarget: new THREE.Vector3(),
+            startTime: 0,
+            duration: 1.0
+        };
+
+        // เก็บ reference ของ text_name เพื่อให้กล้องมองเมื่อกดปุ่ม
+        let textNameTarget = null;
+        let textCreditBuildingTarget = null; 
+        let textCreditDecorationTarget = null;
+        let textCreditTreeTarget = null; // <-- เพิ่มบรรทัดนี้
+
         // ✅ กล้อง
         const camera = new THREE.PerspectiveCamera(
             35,
@@ -117,6 +141,10 @@
         const text_name = new THREE.GLTFLoader();
         text_name.load('https://trakanta4556.github.io/comgraph_project/text_name.glb', function(gltf) {
         const text_name = gltf.scene;
+        text_name.name = 'text_name';
+        const targetPos = new THREE.Vector3();
+        text_name.getWorldPosition(targetPos);
+        console.log('Text Position:', targetPos);
         text_name.traverse(function(child) {
             if (child.isMesh) {
                 child.castShadow = true;
@@ -124,6 +152,8 @@
             }   
         });
         scene.add(text_name);
+        // เก็บ reference ของตำแหน่งสำหรับกล้องไปมอง
+        textNameTarget = text_name;
     });
 
     //load model pic
@@ -269,6 +299,19 @@
         scene.add(tree_house_right);
     });
 
+    //load model tea_table
+    const tea_table = new THREE.GLTFLoader();
+    tea_table.load('https://trakanta4556.github.io/comgraph_project/tea_table.glb', function(gltf) {
+        const tea_table = gltf.scene;
+        tea_table.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }   
+        });
+        scene.add(tea_table);
+    });
+
     //load model plane
         const plane = new THREE.GLTFLoader();
         plane.load('https://trakanta4556.github.io/comgraph_project/plane.glb', function(gltf) {
@@ -282,30 +325,123 @@
         scene.add(plane);
     });
 
+    //load model mirror
+        const mirror = new THREE.GLTFLoader();
+        mirror.load('https://trakanta4556.github.io/comgraph_project/mirror.glb', function(gltf) {
+        const mirror = gltf.scene;
+        mirror.traverse(function(child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }   
+        });
+        scene.add(mirror);
+    });
+
     //load model text_credit_building
         const text_credit_building = new THREE.GLTFLoader();
         text_credit_building.load('https://trakanta4556.github.io/comgraph_project/text_credit_building.glb', function(gltf) {
-        const text_credit_building = gltf.scene;
-        text_credit_building.traverse(function(child) {
-            if (child.isMesh) {
-                child.castShadow = true;
-                child.receiveShadow = true;
-            }   
+            const text_credit_building = gltf.scene;
+            text_credit_building.name = 'text_credit_building'; // <-- ตั้งชื่อเพื่อค้นหา/debug
+            text_credit_building.traverse(function(child) {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                }   
+            });
+            scene.add(text_credit_building);
+            textCreditBuildingTarget = text_credit_building; // <-- เก็บ reference
         });
-        scene.add(text_credit_building);
-    });
 
-    //load model text_credit_decoration
+        //load model text_back_credit_building
+        const text_back_credit_building = new THREE.GLTFLoader();
+        text_back_credit_building.load('https://trakanta4556.github.io/comgraph_project/text_back_credit_building.glb', function(gltf) {
+            const text_back_credit_building = gltf.scene;
+            text_back_credit_building.name = 'text_back_credit_building';
+            text_back_credit_building.traverse(function(child) {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                    // ให้กดแล้วไปที่ credit decoration
+                    child.userData.pickable = true;
+                    child.userData.action = 'goto_text_credit_decoration';
+                    interactables.push(child);
+                }
+            });
+            scene.add(text_back_credit_building);
+            // ถ้าต้องการเก็บ reference เพื่อ debug/ใช้อื่น ให้ตั้งค่า (ไม่บังคับ)
+            textCreditBuildingTarget = text_back_credit_building;
+        });
+
+        //load model text_next_credit_building
+        const text_next_credit_building = new THREE.GLTFLoader();
+        text_next_credit_building.load('https://trakanta4556.github.io/comgraph_project/text_next_credit_building.glb', function(gltf) {
+            const text_next_credit_building = gltf.scene;
+            text_next_credit_building.name = 'text_next_credit_building';
+            text_next_credit_building.traverse(function(child) {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                    // ให้กดแล้วไปที่ credit tree
+                    child.userData.pickable = true;
+                    child.userData.action = 'goto_text_credit_tree';
+                    interactables.push(child);
+                }
+            });
+            scene.add(text_next_credit_building);
+            // ถ้าต้องการเก็บ reference เพื่อ debug/ใช้อื่น ให้ตั้งค่า (ไม่บังคับ)
+            textCreditBuildingTarget = text_next_credit_building;
+        });
+
+        //load model text_credit_decoration
         const text_credit_decoration = new THREE.GLTFLoader();
         text_credit_decoration.load('https://trakanta4556.github.io/comgraph_project/text_credit_decoration.glb', function(gltf) {
-        const text_credit_decoration = gltf.scene;
-        text_credit_decoration.traverse(function(child) {
+            const text_credit_decoration = gltf.scene;
+            text_credit_decoration.name = 'text_credit_decoration';
+            text_credit_decoration.traverse(function(child) {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                }   
+            });
+            scene.add(text_credit_decoration);
+            textCreditDecorationTarget = text_credit_decoration; // <-- เก็บ reference
+        });
+
+    //load model text_back_credit_decor
+        const text_back_credit_decor = new THREE.GLTFLoader();
+        text_back_credit_decor.load('https://trakanta4556.github.io/comgraph_project/text_back_credit_decor.glb', function(gltf) {
+        const text_back_credit_decor = gltf.scene;
+        text_back_credit_decor.name = 'text_back_credit_decor';
+        text_back_credit_decor.traverse(function(child) {
+        if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+            // ทำให้เลือกได้และตั้ง action เป็นกลับไปที่ home (goto_home)
+            child.userData.pickable = true;
+            child.userData.action = 'goto_home';
+            interactables.push(child);
+        }   
+        });
+        scene.add(text_back_credit_decor);
+    });
+
+    //load model text_next_credit_decor
+    const text_next_credit_decor = new THREE.GLTFLoader();
+    text_next_credit_decor.load('https://trakanta4556.github.io/comgraph_project/text_next_credit_decor.glb', function(gltf) {
+        const text_next_credit_decor = gltf.scene;
+        text_next_credit_decor.name = 'text_next_credit_decor';
+        text_next_credit_decor.traverse(function(child) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
-            }   
+                // ทำให้เลือกได้ และเมื่อกดให้ไปที่ text_credit_building
+                child.userData.pickable = true;
+                child.userData.action = 'goto_text_credit_building';
+                interactables.push(child);
+            }
         });
-        scene.add(text_credit_decoration);
+        scene.add(text_next_credit_decor);
     });
 
     //load model text_credit_tree
@@ -319,6 +455,7 @@
             }   
         });
         scene.add(text_credit_tree);
+        textCreditTreeTarget = text_credit_tree; // <-- เก็บ reference ที่นี่
     });
 
     //load model sign_about_me
@@ -327,8 +464,15 @@
         const sign_about_me = gltf.scene;
         sign_about_me.traverse(function(child) {
             if (child.isMesh) {
-                child.castShadow = true;
-                child.receiveShadow = true;
+            child.castShadow = true;
+            child.receiveShadow = true;
+            // ทำให้เลือกได้ และกำหนด action
+            child.userData.pickable = true;
+            child.userData.action = 'goto_text_name';
+            // ใส่ชื่อเพื่อ debug
+            sign_about_me.name = sign_about_me.name || 'sign_about_me';
+            // เก็บลง interactables
+            interactables.push(child);
             }   
         });
         scene.add(sign_about_me);
@@ -337,14 +481,36 @@
     //load model sign_credits
         const sign_credits = new THREE.GLTFLoader();
         sign_credits.load('https://trakanta4556.github.io/comgraph_project/sign_credits.glb', function(gltf) {
-        const sign_credits = gltf.scene;
-        sign_credits.traverse(function(child) {
-            if (child.isMesh) {
-                child.castShadow = true;
-                child.receiveShadow = true;
-            }   
+    const sign_credits = gltf.scene;
+    sign_credits.traverse(function(child) {
+        if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+            // ทำให้เลือกได้และตั้ง action ไปยัง text_credit_decoration
+            child.userData.pickable = true;
+            child.userData.action = 'goto_text_credit_decoration'; // <-- เปลี่ยน action
+            interactables.push(child); // <-- ลงทะเบียนสำหรับ raycast
+        }   
+    });
+    scene.add(sign_credits);
+});
+
+    //load text_back_name
+        const text_back_name = new THREE.GLTFLoader();
+        text_back_name.load('https://trakanta4556.github.io/comgraph_project/text_back_name.glb', function(gltf) {
+        const text_back_name = gltf.scene;
+        text_back_name.name = 'text_back_name';
+        text_back_name.traverse(function(child) {
+        if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+            // mark pickable and set action to return camera
+            child.userData.pickable = true;
+            child.userData.action = 'goto_home';
+            interactables.push(child);
+        }  
         });
-        scene.add(sign_credits);
+        scene.add(text_back_name);
     });
 
     //load water plane 
@@ -425,24 +591,233 @@
         mesh.position.y = -1; // ลดระดับลงนิดหน่อย
         scene.add(mesh);
     });
+    
 
-    // Resize & Render loop
-    addEventListener('resize', ()=>{
+    // Resize
+    addEventListener('resize', ()=>{ 
         camera.aspect = innerWidth/innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(innerWidth, innerHeight);
     });
 
-    (function loop(){
-        uniforms.uTime.value += 0.04;
-        renderer.render(scene, camera);
-        requestAnimationFrame(loop);
-    })();
+    // pointer handlers
+    window.addEventListener('pointermove', (e) => {
+        pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+        pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+        needsPick = true;
+    });
+
+    window.addEventListener('click', (e) => {
+        // ensure pointer matches this click (in case user didn't move mouse)
+        pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+        pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+        // raycast on click
+        raycaster.setFromCamera(pointer, camera);
+        const intersects = raycaster.intersectObjects(interactables, true);
+        if (intersects.length > 0) {
+            const obj = intersects[0].object;
+            if (obj.userData && obj.userData.action === 'goto_text_name' && textNameTarget) {
+                // compute bounding center & size of text_name
+                const bbox = new THREE.Box3().setFromObject(textNameTarget);
+                const targetPos = new THREE.Vector3();
+                bbox.getCenter(targetPos);
+                const size = new THREE.Vector3();
+                bbox.getSize(size);
+                const radius = Math.max(size.length() * 0.5, 0.5);
+
+                // choose view parameters (ปรับค่าเหล่านี้เพื่อเปลี่ยนมุม/ระยะ)
+                const distance = Math.max(6, radius * 4.5); // ระยะจาก target
+                const elevationDeg = 10; // ความสูงมุมมอง (องศา)
+                const azimuthDeg = -18; // หมุนรอบแกน Y (องศา) เปลี่ยนเป็น 45 เพื่อมุมเฉียง
+
+                const phi = THREE.Math.degToRad(azimuthDeg);
+                const theta = THREE.Math.degToRad(elevationDeg);
+
+                // offset vector จากมุม (world space)
+                const offset = new THREE.Vector3(
+                    Math.sin(phi) * Math.cos(theta),
+                    Math.sin(theta),
+                    Math.cos(phi) * Math.cos(theta)
+                ).multiplyScalar(distance);
+
+                const toPos = targetPos.clone().add(offset);
+
+                // start camera tween
+                cameraMove.active = true;
+                cameraMove.fromPos.copy(camera.position);
+                cameraMove.toPos.copy(toPos);
+                cameraMove.fromTarget.copy(controls.target);
+                cameraMove.toTarget.copy(targetPos);
+                cameraMove.startTime = performance.now() / 1000;
+                cameraMove.duration = 1.5; // วินาที
+            } else if (obj.userData && obj.userData.action === 'goto_text_credit_building' && textCreditBuildingTarget) {
+                // compute bounding center & size of text_credit_building
+                const bbox = new THREE.Box3().setFromObject(textCreditBuildingTarget);
+                const targetPos = new THREE.Vector3();
+                bbox.getCenter(targetPos);
+                const size = new THREE.Vector3();
+                bbox.getSize(size);
+                const radius = Math.max(size.length() * 0.5, 0.5);
+
+                // choose view parameters (ปรับค่าเหล่านี้เพื่อเปลี่ยนมุม/ระยะ)
+                const distance = Math.max(6, radius * 4.5); // ระยะจาก target
+                const elevationDeg = 50; // ความสูงมุมมอง (องศา)
+                const azimuthDeg = 100; // หมุนรอบแกน Y (องศา) เปลี่ยนเป็น 45 เพื่อมุมเฉียง
+
+                const phi = THREE.Math.degToRad(azimuthDeg);
+                const theta = THREE.Math.degToRad(elevationDeg);
+
+                // offset vector จากมุม (world space)
+                const offset = new THREE.Vector3(
+                    Math.sin(phi) * Math.cos(theta),
+                    Math.sin(theta),
+                    Math.cos(phi) * Math.cos(theta)
+                ).multiplyScalar(distance);
+
+                const toPos = targetPos.clone().add(offset);
+
+                // start camera tween
+                cameraMove.active = true;
+                cameraMove.fromPos.copy(camera.position);
+                cameraMove.toPos.copy(toPos);
+                cameraMove.fromTarget.copy(controls.target);
+                cameraMove.toTarget.copy(targetPos);
+                cameraMove.startTime = performance.now() / 1000;
+                cameraMove.duration = 1.5; // วินาที
+            } else if (obj.userData && obj.userData.action === 'goto_text_credit_decoration' && textCreditDecorationTarget) {
+                // compute bounding center & size of text_credit_decoration
+                const bbox = new THREE.Box3().setFromObject(textCreditDecorationTarget);
+                const targetPos = new THREE.Vector3();
+                bbox.getCenter(targetPos);
+                const size = new THREE.Vector3();
+                bbox.getSize(size);
+                const radius = Math.max(size.length() * 0.5, 0.5);
+
+                // ปรับมุม/ระยะ: เพิ่ม azimuth ให้ไปทางขวา และเพิ่ม elevation ให้กล้องสูงขึ้น
+                const distance = Math.max(6, radius * 4); // ปรับถ้าต้องการถอย/เข้า
+                const elevationDeg = 48; // เพิ่มค่านี้เพื่อให้กล้องสูงขึ้น
+                const azimuthDeg = 9.5;   // ค่า + เป็นเลื่อนมาทางขวา (ปรับเป็นลบถ้าต้องการซ้าย)
+
+                const phi = THREE.Math.degToRad(azimuthDeg);
+                const theta = THREE.Math.degToRad(elevationDeg);
+
+                // offset vector จากมุม (world space)
+                const offset = new THREE.Vector3(
+                    Math.sin(phi) * Math.cos(theta),
+                    Math.sin(theta),
+                    Math.cos(phi) * Math.cos(theta)
+                ).multiplyScalar(distance);
+
+                const toPos = targetPos.clone().add(offset);
+
+                // start camera tween
+                cameraMove.active = true;
+                cameraMove.fromPos.copy(camera.position);
+                cameraMove.toPos.copy(toPos);
+                cameraMove.fromTarget.copy(controls.target);
+                cameraMove.toTarget.copy(targetPos);
+                cameraMove.startTime = performance.now() / 1000;
+                cameraMove.duration = 1.5; // ปรับความเร็ว
+            } else if (obj.userData && obj.userData.action === 'goto_home') {
+                // กลับไปมองตำแหน่ง homeTarget ด้วยมุมที่กำหนด
+                const homeTarget = new THREE.Vector3(2, 3, 34); // จุดที่ให้กล้องมองถึง
+                // ปรับมุมที่ต้องการเมื่อกด back (องศา)
+                const azimuthDeg = -2;    // หมุนรอบแกน Y (ซ้าย/ขว)
+                const elevationDeg = 7.5;    // มุมเอียงขึ้น/ลง
+                const distance = 12.5;       // ระยะจาก target (ปรับเพื่อถอย/เข้า)
+
+                const phi = THREE.Math.degToRad(azimuthDeg);
+                const theta = THREE.Math.degToRad(elevationDeg);
+
+                const offset = new THREE.Vector3(
+                    Math.sin(phi) * Math.cos(theta),
+                    Math.sin(theta),
+                    Math.cos(phi) * Math.cos(theta)
+                ).multiplyScalar(distance);
+
+                const toPos = homeTarget.clone().add(offset);
+
+                cameraMove.active = true;
+                cameraMove.fromPos.copy(camera.position);
+                cameraMove.toPos.copy(toPos);
+                cameraMove.fromTarget.copy(controls.target);
+                cameraMove.toTarget.copy(homeTarget);
+                cameraMove.startTime = performance.now() / 1000;
+                cameraMove.duration = 1.5;
+            } else if (obj.userData && obj.userData.action === 'goto_text_credit_tree' && textCreditTreeTarget) {
+                // compute bounding center & size of text_credit_tree
+                const bbox = new THREE.Box3().setFromObject(textCreditTreeTarget);
+                const targetPos = new THREE.Vector3();
+                bbox.getCenter(targetPos);
+                const size = new THREE.Vector3();
+                bbox.getSize(size);
+                const radius = Math.max(size.length() * 0.5, 0.5);
+
+                // ปรับมุม/ระยะ: เพิ่ม azimuth ให้ไปทางขวา และเพิ่ม elevation ให้กล้องสูงขึ้น
+                const distance = Math.max(6, radius * 3); // ปรับถ้าต้องการถอย/เข้า
+                const elevationDeg = 34; // เพิ่มค่านี้เพื่อให้กล้องสูงขึ้น
+                const azimuthDeg = 135;   // ค่า + เป็นเลื่อนมาทางขวา (ปรับเป็นลบถ้าต้องการซ้าย)
+
+                const phi = THREE.Math.degToRad(azimuthDeg);
+                const theta = THREE.Math.degToRad(elevationDeg);
+
+                // offset vector จากมุม (world space)
+                const offset = new THREE.Vector3(
+                    Math.sin(phi) * Math.cos(theta),
+                    Math.sin(theta),
+                    Math.cos(phi) * Math.cos(theta)
+                ).multiplyScalar(distance);
+
+                const toPos = targetPos.clone().add(offset);
+
+                // start camera tween
+                cameraMove.active = true;
+                cameraMove.fromPos.copy(camera.position);
+                cameraMove.toPos.copy(toPos);
+                cameraMove.fromTarget.copy(controls.target);
+                cameraMove.toTarget.copy(targetPos);
+                cameraMove.startTime = performance.now() / 1000;
+                cameraMove.duration = 1.5; // ปรับความเร็ว
+            }
+        }
+    });
+
+    // highlight on hover (optional)
+    function applyHighlight(obj) {
+        if (!obj) return;
+        const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+        mats.forEach(m => {
+            if (!m) return;
+            if (m.emissive !== undefined) {
+                if (obj.userData._origEmissive === undefined) obj.userData._origEmissive = m.emissive.getHex();
+                m.emissive.setHex(0x333333);
+            } else if (m.color) {
+                if (obj.userData._origColor === undefined) obj.userData._origColor = m.color.getHex();
+                m.color.setHex(0x8899ff);
+            }
+        });
+    }
+    function clearHighlight(obj) {
+        if (!obj) return;
+        const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+        mats.forEach(m => {
+            if (!m) return;
+            if (m.emissive !== undefined && obj.userData._origEmissive !== undefined) {
+                m.emissive.setHex(obj.userData._origEmissive);
+            } else if (m.color && obj.userData._origColor !== undefined) {
+                m.color.setHex(obj.userData._origColor);
+            }
+        });
+        delete obj.userData._origEmissive;
+        delete obj.userData._origColor;
+    }
+
+    // unified animate
+    const clock = new THREE.Clock(); // ถ้ามาประกาศก่อนแล้ว ให้ใช้ของเดิม
+    let mixer = window.mixer || undefined; // ถ้ามี loader สร้าง mixer ให้กำหนด mixer หลังโหลด
 
     // — โหลดโมเดล GLB ที่มี animation
-    let mixer;
-    const clock = new THREE.Clock();
-
     const loader = new THREE.GLTFLoader();
     loader.load('https://trakanta4556.github.io/comgraph_project/animationglb.glb',(gltf) => {
         console.log("✅ GLB loaded", gltf);
@@ -460,18 +835,57 @@
         }
     );
 
-        //✅ render loop
-        function animate(t) {
-            const delta = clock.getDelta();
-            if (mixer) mixer.update(delta);
-            renderer.render(scene, camera);
-            requestAnimationFrame(animate);
+
+    function animate() {
+        const delta = clock.getDelta();
+        // update animation mixer
+        if (mixer) mixer.update(delta);
+
+        // update water shader time (เดิมเพิ่มค่า)
+        if (typeof uniforms !== 'undefined' && uniforms.uTime) {
+            uniforms.uTime.value += 0.04;
         }
-        animate(0);
 
-        window.addEventListener('keydown', (event) => {
+        // handle picking highlight (throttled by animation frame)
+        if (needsPick) {
+            raycaster.setFromCamera(pointer, camera);
+            const intersects = raycaster.intersectObjects(interactables, true);
+            const first = intersects.length ? intersects[0].object : null;
+            if (first !== highlighted) {
+                if (highlighted) clearHighlight(highlighted);
+                highlighted = first;
+                if (highlighted) applyHighlight(highlighted);
+            }
+            needsPick = false;
+        }
 
-        });
+        // handle camera movement tween
+        if (cameraMove.active) {
+            const now = performance.now() / 1000;
+            const t = (now - cameraMove.startTime) / cameraMove.duration;
+            const tt = Math.min(Math.max(t, 0), 1);
+            camera.position.lerpVectors(cameraMove.fromPos, cameraMove.toPos, tt);
+            controls.target.lerpVectors(cameraMove.fromTarget, cameraMove.toTarget, tt);
+            controls.update();
+            if (tt >= 1) cameraMove.active = false;
+        }
+
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+    // //✅ render loop
+    // function animate(t) {
+    //     const delta = clock.getDelta();
+    //     if (mixer) mixer.update(delta);
+    //     renderer.render(scene, camera);
+    //     requestAnimationFrame(animate);
+    // }
+    // animate(0);
+
+    // window.addEventListener('keydown', (event) => {
+
+    // });
 
     </script>
 </body>
